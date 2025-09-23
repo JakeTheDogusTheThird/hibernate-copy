@@ -1,7 +1,9 @@
 package com.example.hibernate.models;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -11,9 +13,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.NaturalId;
 
-import java.util.Collection;
 import java.util.HashSet;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -25,16 +28,18 @@ public class Member {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private int id;
+  @Column(name = "first_name")
   private String firstName;
+  @Column(name = "last_name")
   private String lastName;
+  @NaturalId
   private String email;
-  @OneToMany(cascade = CascadeType.ALL, mappedBy = "id")
-  private Collection<Loan> loans = new HashSet<>();
+  @OneToMany(cascade = CascadeType.ALL, mappedBy = "id", fetch = FetchType.EAGER)
+  private Set<Loan> loans = new HashSet<>();
 
-  public Member(String firstName, String lastName, String email, Collection<Loan> loans) {
+  public Member(String firstName, String lastName, String email) {
     this.firstName = firstName;
     this.lastName = lastName;
     this.email = email;
-    this.loans = loans;
   }
 }

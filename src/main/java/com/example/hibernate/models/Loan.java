@@ -28,12 +28,12 @@ public class Loan {
   private Member member;
   @ManyToOne
   private Book book;
-  @Column
+  @Column(name = "loan_date")
   private LocalDate loanDate;
-  @Column
+  @Column(name = "return_date")
   private LocalDate returnDate;
 
-  public Loan(Member member, Book book, LocalDate loanDate, LocalDate returnDate) {
+  public Loan(Book book, Member member, LocalDate loanDate, LocalDate returnDate) {
     this.member = member;
     this.book = book;
     this.loanDate = loanDate;
