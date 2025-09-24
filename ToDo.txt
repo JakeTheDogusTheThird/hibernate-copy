@@ -1,0 +1,31 @@
+BookService
+addBook(Book) - save
+updateBook(Book) ? -> DAO
+deleteBook(Book) ? -> DAO
+findBookByIsbn(isbn) when creating a loan -> DAO
+searchBooks(keyword)
+listAllBooks()
+
+MemberService
+registerMember() -> save
+updateMember()
+deleteMember()
+findByEmail(email) email is natural id
+listAll()
+getMemberLoans(id)
+
+LoanService
+loanBook(isbn, member_id) - findBook, findMember, saveLoan
+returnBook(isbn, member_id)
+findActiveLoansByMember(member_id)
+findOverdueLoans()
+listAll()
+
+Loan loanBook(Member member, Book book);
+void returnBook(int loanId);
+Loan extendLoan(int loanId, LocalDate newReturnDate);
+Set<Loan> getLoanHistoryForMember(int memberId);
+Set<Loan> getActiveLoansForMember(int memberId);
+boolean isBookAvailable(int bookId);
+boolean isMemberEligibleForLoan(int memberId);
+List<Loan> getOverdueLoans();

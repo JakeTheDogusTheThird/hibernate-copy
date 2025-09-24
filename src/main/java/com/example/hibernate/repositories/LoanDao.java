@@ -2,7 +2,6 @@ package com.example.hibernate.repositories;
 
 import com.example.hibernate.models.Book;
 import com.example.hibernate.models.Loan;
-import com.example.hibernate.models.Member;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;

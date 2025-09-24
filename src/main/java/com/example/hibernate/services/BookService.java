@@ -9,20 +9,28 @@ import java.util.Set;
 
 public class BookService {
   private final BookDao bookDao;
+  private final BookValidator bookValidator;
 
-  public BookService(BookDao bookDao) {
+  public BookService(BookDao bookDao, BookValidator bookValidator) {
     this.bookDao = bookDao;
+    this.bookValidator = bookValidator;
   }
 
-  public Book addBook(Book book) {
+  public Book createBook(Book book) {
+    if (!bookValidator.isValid(book)) {
+      return null;
+    }
     return this.bookDao.save(book);
   }
 
-  public Book findBook(int id) {
+  public Book getBookById(int id) {
     return this.bookDao.findById(id);
   }
 
   public Book updateBook(Book book) {
+    if (!bookValidator.isValid(book)) {
+      return null;
+    }
     return this.bookDao.update(book);
   }
 
@@ -38,8 +46,11 @@ public class BookService {
     return this.bookDao.searchByKeyword(keyword);
   }
 
-  public Set<Loan> getLoanHistory(int id) {
+  public Set<Loan> getLoanHistoryForBook(int id) {
     return this.bookDao.findById(id).getLoans();
   }
 
+  public List<Book> getBookCopies(String isbn) {
+    return this.bookDao.findAvailableCopiesByIsbn(isbn);
+  }
 }

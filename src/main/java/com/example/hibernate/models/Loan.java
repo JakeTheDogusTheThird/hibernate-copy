@@ -7,6 +7,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -30,6 +31,7 @@ public class Loan {
   private Book book;
   @Column(name = "loan_date")
   private LocalDate loanDate;
+  @Setter(AccessLevel.NONE)
   @Column(name = "return_date")
   private LocalDate returnDate;
 
@@ -37,6 +39,25 @@ public class Loan {
     this.member = member;
     this.book = book;
     this.loanDate = loanDate;
+    this.returnDate = returnDate;
+  }
+
+  @Override
+  public final boolean equals(Object o) {
+    if (!(o instanceof Loan loan)) return false;
+
+    return id == loan.id;
+  }
+
+  @Override
+  public int hashCode() {
+    return id;
+  }
+
+  public void setReturnDate(LocalDate returnDate) {
+    if (returnDate.isBefore(this.loanDate)) {
+      throw new IllegalArgumentException("Return Date cannot be before Return Date");
+    }
     this.returnDate = returnDate;
   }
 }

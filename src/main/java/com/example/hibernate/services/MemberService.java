@@ -9,25 +9,33 @@ import java.util.Set;
 
 public class MemberService {
   private final MemberDao memberDao;
+  private final MemberValidator memberValidator;
 
-  public MemberService(MemberDao memberDao) {
+  public MemberService(MemberDao memberDao, MemberValidator memberValidator) {
     this.memberDao = memberDao;
+    this.memberValidator = memberValidator;
   }
 
-  public void addMember(Member member) {
-    this.memberDao.save(member);
+  public Member createMember(Member member) {
+    if (!memberValidator.isValid(member)) {
+      return null;
+    }
+    return this.memberDao.save(member);
   }
 
-  public Member findMember(int id) {
+  public Member getMemberById(int id) {
     return this.memberDao.findById(id);
   }
 
   public Member updateMember(Member member) {
+    if (!memberValidator.isValid(member)) {
+      return null;
+    }
     return this.memberDao.update(member);
   }
 
-  public void deleteMember(Member member) {
-    this.memberDao.delete(member);
+  public void deleteMember(int id) {
+    this.memberDao.deleteById(id);
   }
 
   public List<Member> listMembers() {
@@ -38,7 +46,7 @@ public class MemberService {
     return this.memberDao.findByEmail(email);
   }
 
-  public Set<Loan> showMemberLoans(int id) {
-    return this.findMember(id).getLoans();
+  public Set<Loan> getMemberLoans(int id) {
+    return this.getMemberById(id).getLoans();
   }
 }

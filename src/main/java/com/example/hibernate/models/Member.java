@@ -34,7 +34,7 @@ public class Member {
   private String lastName;
   @NaturalId
   private String email;
-  @OneToMany(cascade = CascadeType.ALL, mappedBy = "id", fetch = FetchType.EAGER)
+  @OneToMany(cascade = CascadeType.ALL, mappedBy = "member", fetch = FetchType.EAGER)
   private Set<Loan> loans = new HashSet<>();
 
   public Member(String firstName, String lastName, String email) {

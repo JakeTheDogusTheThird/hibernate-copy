@@ -33,7 +33,7 @@ public class Book {
   private String author;
   @Column(name = "publication_year")
   private String year;
-  @OneToMany(cascade = CascadeType.ALL, mappedBy = "id", fetch = FetchType.EAGER)
+  @OneToMany(cascade = CascadeType.ALL, mappedBy = "book", fetch = FetchType.EAGER)
   private Set<Loan> loans = new HashSet<>();
 
   public Book(String isbn, String title, String author, String year) {
