@@ -42,4 +42,16 @@ public class Book {
     this.author = author;
     this.year = year;
   }
+
+  @Override
+  public final boolean equals(Object o) {
+    if (!(o instanceof Book book)) return false;
+
+    return id == book.id;
+  }
+
+  @Override
+  public int hashCode() {
+    return id;
+  }
 }

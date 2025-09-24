@@ -29,26 +29,45 @@ public class LoanService {
     this.loanValidator = loanValidator;
   }
 
-  public Loan loanBook(String isbn, String email) {
-    Member member = this.memberService.findMemberByEmail(email);
+  public double calculatePopularityIndex(String isbn) {
+    List<Loan> loans = listAll();
+    long borrowedTime = loans
+        .stream()
+        .filter(loan -> loan.getBook().getIsbn().equals(isbn))
+        .count();
+    return (double) borrowedTime / loans.size() * 100;
+  }
+
+  public Loan loanBook(String isbn, String email, LocalDate loanDate) {
+    Member member = memberService.findMemberByEmail(email);
+    validateMemberLoans(member);
+
+    Book book = findAvailableBook(isbn);
+
+    Loan loan = new Loan(book, member, loanDate, loanDate.plusDays(MAX_LOAN_PERIOD));
+    if (!loanValidator.isValid(loan)) {
+      return null;
+    }
+
+    return loanDao.save(loan);
+  }
+
+  private void validateMemberLoans(Member member) {
     List<Loan> overdueLoans = getOverdueLoans()
         .stream()
         .filter(l -> l.getMember().equals(member))
         .toList();
     if (!overdueLoans.isEmpty()) {
-      throw new IllegalStateException("Overdue loans exist");
+      throw new OverdueLoanException(member, overdueLoans);
     }
+  }
 
-    List<Book> available = this.bookService.getBookCopies(isbn);
+  private Book findAvailableBook(String isbn) {
+    List<Book> available = bookService.getBookCopies(isbn);
     if (available.isEmpty()) {
-      throw new IllegalStateException("No available copies of this book.");
+      throw new NoAvailableCopiesException(isbn);
     }
-    Book book = available.getFirst();
-    Loan loan = new Loan(book, member, LocalDate.now(), null);
-    if (!loanValidator.isValid(loan)) {
-      return null;
-    }
-    return this.loanDao.save(loan);
+    return available.getFirst();
   }
 
   public void returnBook(int id) {
@@ -57,20 +76,20 @@ public class LoanService {
     this.loanDao.save(loan);
   }
 
-  public Loan extendLoan(int loanId, LocalDate newReturnDate){
+  public Loan extendLoan(int loanId, LocalDate newReturnDate) {
     Loan loan = loanDao.findById(loanId);
     if (loan == null) throw new NullPointerException("No loan exists with id " + loanId);
-
-    if (newReturnDate.isAfter(loan.getReturnDate().plusDays(MAX_EXTEND_PERIOD))) {
-      throw new IllegalArgumentException("Extension exceeds max allowed period");
-    }
 
     if (newReturnDate.isBefore(loan.getReturnDate())) {
       throw new IllegalArgumentException("Extension is chronologically invalid");
     }
 
+    if (newReturnDate.isAfter(loan.getReturnDate().plusDays(MAX_EXTEND_PERIOD))) {
+      throw new IllegalArgumentException("Extension exceeds max allowed period");
+    }
+
     loan.setReturnDate(newReturnDate);
-    return loanDao.update(loan);
+    return this.loanDao.update(loan);
   }
 
   public List<Loan> listAll() {
@@ -81,9 +100,31 @@ public class LoanService {
     return this.loanDao.findBooksOnLoan();
   }
 
-  List<Loan> getOverdueLoans() {
+  public List<Loan> getMemberLoanHistory(Member member) {
+    return listAll()
+        .stream()
+        .filter(loan -> loan.getMember().equals(member))
+        .toList();
+  }
+
+  public List<Loan> getMemberActiveLoans(Member member) {
+    return listAll()
+        .stream()
+        .filter(loan -> loan.getMember().equals(member))
+        .filter(loan -> loan.getReturnDate() == null)
+        .toList();
+  }
+
+  public List<Loan> getBookLoanHistory(Book book) {
+    return listAll()
+        .stream()
+        .filter(loan -> loan.getBook().equals(book))
+        .toList();
+  }
+
+  public List<Loan> getOverdueLoans() {
     LocalDate today = LocalDate.now();
-    return loanDao.findAll()
+    return listAll()
         .stream()
         .filter(loan -> loan.getReturnDate() == null
             && loan.getLoanDate().plusDays(MAX_LOAN_PERIOD).isBefore(today))

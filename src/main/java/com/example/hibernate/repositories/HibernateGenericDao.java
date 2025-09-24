@@ -6,7 +6,7 @@ import org.hibernate.Transaction;
 
 import java.io.Serializable;
 import java.util.List;
-import java.util.Objects;
+import java.util.function.Function;
 
 public class HibernateGenericDao<T, ID extends Serializable> implements GenericDao<T, ID> {
 
@@ -24,87 +24,36 @@ public class HibernateGenericDao<T, ID extends Serializable> implements GenericD
 
   @Override
   public T findById(ID id) {
-    Transaction transaction = null;
-    try (Session session = getCurrentSession()) {
-      transaction = session.beginTransaction();
-      T result = session.find(persistentClass, id);
-      transaction.commit();
-      return result;
-    } catch (RuntimeException re) {
-      if (Objects.nonNull(transaction)) {
-        transaction.rollback();
-      }
-      throw re;
-    }
+    return executeInTransaction(session -> session.find(persistentClass, id));
   }
 
   @Override
   public List<T> findAll() {
-    Transaction transaction = null;
-    try (Session session = getCurrentSession()) {
-      transaction = session.beginTransaction();
-      List<T> result = session.createQuery(
-          "from " + persistentClass.getSimpleName(),
-          persistentClass
-      ).list();
-      transaction.commit();
-      return result;
-    } catch (RuntimeException re) {
-      if (Objects.nonNull(transaction)) {
-        transaction.rollback();
-      }
-      throw re;
-    }
+    return executeInTransaction(session -> session.createQuery(
+        "from " + persistentClass.getSimpleName(),
+        persistentClass
+    ).list());
   }
 
   @Override
   public T save(T entity) {
-    Objects.requireNonNull(entity);
-    Transaction transaction = null;
-    try (Session session = getCurrentSession()) {
-      transaction = session.beginTransaction();
+    return executeInTransaction(session -> {
       session.persist(entity);
-      transaction.commit();
       return entity;
-    } catch (RuntimeException re) {
-      if (Objects.nonNull(transaction)) {
-        transaction.rollback();
-      }
-      throw re;
-    }
+    });
   }
 
   @Override
   public T update(T entity) {
-    Objects.requireNonNull(entity);
-    Transaction transaction = null;
-    try (Session session = getCurrentSession()) {
-      transaction = session.beginTransaction();
-      entity = session.merge(entity);
-      transaction.commit();
-      return entity;
-    } catch (RuntimeException re) {
-      if (Objects.nonNull(transaction)) {
-        transaction.rollback();
-      }
-      throw re;
-    }
+    return executeInTransaction(session -> session.merge(entity));
   }
 
   @Override
   public void delete(T entity) {
-    Objects.requireNonNull(entity);
-    Transaction transaction = null;
-    try (Session session = getCurrentSession()) {
-      transaction = session.beginTransaction();
+    executeInTransaction(session -> {
       session.remove(entity);
-      transaction.commit();
-    } catch (RuntimeException re) {
-      if (Objects.nonNull(transaction)) {
-        transaction.rollback();
-      }
-      throw re;
-    }
+      return null;
+    });
   }
 
   @Override
@@ -113,5 +62,21 @@ public class HibernateGenericDao<T, ID extends Serializable> implements GenericD
     if (entity != null) {
       delete(entity);
     }
+  }
+
+  protected <R> R executeInTransaction(Function<Session, R> action) {
+    Transaction transaction = null;
+    R result = null;
+    try (Session session = getCurrentSession()) {
+      transaction = session.beginTransaction();
+      result = action.apply(session);
+      transaction.commit();
+    } catch (RuntimeException e) {
+      if (transaction != null) {
+        transaction.rollback();
+      }
+      throw e;
+    }
+    return result;
   }
 }

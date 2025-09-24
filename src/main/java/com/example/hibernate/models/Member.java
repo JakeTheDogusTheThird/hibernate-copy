@@ -16,6 +16,7 @@ import lombok.ToString;
 import org.hibernate.annotations.NaturalId;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 @Getter
@@ -41,5 +42,17 @@ public class Member {
     this.firstName = firstName;
     this.lastName = lastName;
     this.email = email;
+  }
+
+  @Override
+  public final boolean equals(Object o) {
+    if (!(o instanceof Member member)) return false;
+
+    return Objects.equals(email, member.email);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hashCode(email);
   }
 }

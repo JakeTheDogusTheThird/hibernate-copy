@@ -45,8 +45,4 @@ public class MemberService {
   public Member findMemberByEmail(String email) {
     return this.memberDao.findByEmail(email);
   }
-
-  public Set<Loan> getMemberLoans(int id) {
-    return this.getMemberById(id).getLoans();
-  }
 }

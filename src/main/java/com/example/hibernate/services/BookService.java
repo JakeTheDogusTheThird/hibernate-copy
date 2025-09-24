@@ -46,10 +46,6 @@ public class BookService {
     return this.bookDao.searchByKeyword(keyword);
   }
 
-  public Set<Loan> getLoanHistoryForBook(int id) {
-    return this.bookDao.findById(id).getLoans();
-  }
-
   public List<Book> getBookCopies(String isbn) {
     return this.bookDao.findAvailableCopiesByIsbn(isbn);
   }

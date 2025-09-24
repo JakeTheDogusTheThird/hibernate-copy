@@ -1,7 +1,8 @@
+package com.example.hibernate.services;
+
 import com.example.hibernate.models.Book;
 import com.example.hibernate.models.Loan;
 import com.example.hibernate.models.Member;
-import com.example.hibernate.services.LoanValidator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullSource;

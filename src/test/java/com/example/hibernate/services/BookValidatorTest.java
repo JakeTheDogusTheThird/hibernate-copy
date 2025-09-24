@@ -1,5 +1,6 @@
+package com.example.hibernate.services;
+
 import com.example.hibernate.models.Book;
-import com.example.hibernate.services.BookValidator;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.NullSource;

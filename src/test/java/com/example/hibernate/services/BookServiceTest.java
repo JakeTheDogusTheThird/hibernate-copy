@@ -1,9 +1,9 @@
+package com.example.hibernate.services;
+
 import com.example.hibernate.models.Book;
 import com.example.hibernate.models.Loan;
 import com.example.hibernate.models.Member;
 import com.example.hibernate.repositories.BookDao;
-import com.example.hibernate.services.BookService;
-import com.example.hibernate.services.BookValidator;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -102,36 +102,6 @@ public class BookServiceTest {
     List<Book> books;
     books = bookService.searchBooks(keyword);
     assertEquals(books, expectedBooks);
-  }
-
-  @Test
-  void getLoanHistory_ForBook_returnLoans() {
-    Book book =  new Book("0-306-40615-2", "Title1", "Author", "2022");
-    book.setId(1);
-    Member member = new Member("John", "Doe", "john@gmail.com");
-    Loan loan1 = new Loan(
-        book,
-        member,
-        LocalDate.of(2025, 9, 24),
-        LocalDate.of(2025, 9, 30)
-    );
-    Loan loan2 = new Loan(
-        book,
-        member,
-        LocalDate.of(2025, 9, 15),
-        LocalDate.of(2025, 9, 24)
-    );
-    loan1.setId(1);
-    loan2.setId(2);
-    Set<Loan> expectedLoans = Set.of(
-        loan1,
-        loan2
-    );
-    book.setLoans(expectedLoans);
-
-    when(bookDao.findById(book.getId())).thenReturn(book);
-    Set<Loan> retrievedLoans = bookService.getLoanHistoryForBook(book.getId());
-    assertEquals(expectedLoans, retrievedLoans);
   }
 
   @Test
